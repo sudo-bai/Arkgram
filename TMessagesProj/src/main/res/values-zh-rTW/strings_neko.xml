@@ -70,7 +70,7 @@
     <string name="CallTo">撥打給 **%1$s**？</string>
     <string name="DisableNumberRounding">停用數字四捨五入</string>
     <string name="Categories">分類</string>
-    <string name="OfficialChannel">Nagram 頻道</string>
+    <string name="OfficialChannel">Arkgram 頻道</string>
     <string name="About">關於</string>
     <string name="IgnoreBlockedAbout">您將不會再看到被封鎖的使用者在群組中的訊息。</string>
     <string name="SourceCode">原始碼</string>

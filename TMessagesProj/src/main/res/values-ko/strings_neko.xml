@@ -70,7 +70,7 @@
     <string name="CallTo">**%1$s**에게 전화할까요?</string>
     <string name="DisableNumberRounding">숫자 반올림 끄기</string>
     <string name="Categories">카테고리</string>
-    <string name="OfficialChannel">Nagram 채널</string>
+    <string name="OfficialChannel">Arkgram 채널</string>
     <string name="About">정보</string>
     <string name="IgnoreBlockedAbout">그룹에서 차단한 사용자의 메시지가 더 이상 표시되지 않습니다.</string>
     <string name="SourceCode">소스 코드</string>

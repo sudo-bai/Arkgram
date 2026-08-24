@@ -70,7 +70,7 @@
     <string name="CallTo">Zadzwonić do **%1$s**?</string>
     <string name="DisableNumberRounding">Wyłącz zaokrąglanie liczb</string>
     <string name="Categories">Kategorie</string>
-    <string name="OfficialChannel">Kanał Nagram</string>
+    <string name="OfficialChannel">Kanał Arkgram</string>
     <string name="About">O aplikacji</string>
     <string name="IgnoreBlockedAbout">Nie będziesz już widzieć wiadomości od zablokowanych użytkowników w grupach.</string>
     <string name="SourceCode">Kod źródłowy</string>

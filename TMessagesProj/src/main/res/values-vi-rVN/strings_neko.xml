@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NekoSettings">Cài đặt Nagram X</string>
+    <string name="NekoSettings">Cài đặt Arkgram</string>
     <string name="IPv6">Ưu tiên IPv6</string>
     <string name="MessageMenu">Menu tin nhắn</string>
     <string name="HidePhone">Ẩn số điện thoại</string>
@@ -70,7 +70,7 @@
     <string name="CallTo">Gọi cho **%1$s**?</string>
     <string name="DisableNumberRounding">Vô hiệu hoá làm tròn số</string>
     <string name="Categories">Danh mục</string>
-    <string name="OfficialChannel">Kênh của Nagram</string>
+    <string name="OfficialChannel">Kênh của Arkgram</string>
     <string name="About">Thông tin</string>
     <string name="IgnoreBlockedAbout">Bạn sẽ không thấy tin nhắn của người đã chặn trong nhóm.</string>
     <string name="SourceCode">Mã nguồn</string>
@@ -113,7 +113,7 @@
     <string name="UnknownNekoSettingsOption">Không có tùy chọn N-Settings nào như vậy.</string>
     <string name="PasscodeNeeded">Bạn cần kích hoạt mã khoá trước</string>
     <string name="PasscodeNeko">Mã khoá</string>
-    <string name="PasscodeShowInSettings">Hiển thị trong cài đặt Nagram</string>
+    <string name="PasscodeShowInSettings">Hiển thị trong cài đặt Arkgram</string>
     <string name="PasscodeShowInSettingsAbout">Sau khi ẩn, bạn **chỉ có thể** mở trang này qua liên kết:</string>
     <string name="PasscodeSet">Đặt mã khoá</string>
     <string name="PasscodeEdit">Thay đổi mã khoá</string>
@@ -151,7 +151,7 @@
     <string name="ClearRecentChats">Xóa các cuộc trò chuyện gần đây</string>
     <string name="ClearRecentChatAlert">Bạn có muốn xóa các cuộc trò chuyện gần đây không?</string>
     <string name="CloudConfig">Cài đặt đám mây</string>
-    <string name="CloudConfigDesc">Lưu Cài đặt NagramX của bạn vào đám mây Telegram.</string>
+    <string name="CloudConfigDesc">Lưu Cài đặt Arkgram của bạn vào đám mây Telegram.</string>
     <string name="CloudConfigSyncDate">Lần đồng bộ cuối: %s, đám mây: %s</string>
     <string name="CloudConfigSyncDateNever">không bao giờ</string>
     <string name="CloudConfigSync">Đồng bộ lên cloud</string>
