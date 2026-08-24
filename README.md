@@ -1,14 +1,5 @@
-# Nagram X
+# Arkgram
 
-> [!IMPORTANT]
-> This project is archived and no longer maintained. No further updates, bug fixes, or support will be provided. The source code and existing releases remain available for reference and for anyone who wishes to continue development in a fork.
-
-## Archived Downloads
-
-Previously published versions remain available through:
-
-* [Telegram Channel](https://t.me/NagramX)
-* [GitHub Releases](https://github.com/risin42/NagramX/releases)
 
 ## Verify APK
 
@@ -22,7 +13,7 @@ Official APKs use the following Android signing certificate:
 1. Clone the repository with its submodules:
 
     ```bash
-    git clone --recursive --shallow-submodules https://github.com/risin42/NagramX.git NagramX
+    git clone --recursive --shallow-submodules https://github.com/sudo-bai/Arkgram.git Arkgram
     ```
 
     If you already cloned the repository without submodules, run:
@@ -83,6 +74,7 @@ The workflow can be used from a fork of this repository.
 
 ## Acknowledgments
 
+- [Nagram X](https://github.com/risin42/NagramX)
 - [AyuGram](https://github.com/AyuGram/AyuGram4A)
 - [Cherrygram](https://github.com/arsLan4k1390/Cherrygram)
 - [Dr4iv3rNope](https://github.com/Dr4iv3rNope/NotSoAndroidAyuGram)
