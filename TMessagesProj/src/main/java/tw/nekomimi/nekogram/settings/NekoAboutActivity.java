@@ -43,10 +43,8 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == xChannelRow || position == channelTipsRow) {
+        if (position == xChannelRow || position == channelRow || position == channelTipsRow) {
             return;
-        } else if (position == channelRow) {
-            MessagesController.getInstance(currentAccount).openByUserName("nagram_channel", NekoAboutActivity.this, 1);
         } else if (position == translationRow) {
             Browser.openUrl(getParentActivity(), "https://crowdin.com/project/NagramX");
         } else if (position == sourceCodeRow) {
@@ -74,7 +72,7 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
                 if (position == xChannelRow) {
                     textCell.setTextAndValue(getString(R.string.XChannel), getString(R.string.NotCreated), false);
                 } else if (position == channelRow) {
-                    textCell.setTextAndValue(getString(R.string.OfficialChannel), "@nagram_channel", true);
+                    textCell.setTextAndValue(getString(R.string.OfficialChannel), getString(R.string.NotCreated), false);
                 } else if (position == channelTipsRow) {
                     textCell.setTextAndValue(getString(R.string.TipsChannel), getString(R.string.NotCreated), false);
                 } else if (position == sourceCodeRow) {
