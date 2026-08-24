@@ -6,7 +6,7 @@
 Official APKs use the following Android signing certificate:
 
 * Package name: `io.skadi.arkgram`
-* SHA-256: `0D:51:91:56:E8:0C:91:8C:28:C4:80:BF:D1:3F:31:6A:3B:3B:F7:22:DB:53:2F:AB:74:66:0E:C8:E5:C5:06:A1`
+* SHA-256: `90:FF:62:DD:05:E7:E6:EE:F6:65:B4:E2:36:93:D4:1A:32:90:A2:A3:B7:1F:A8:46:25:97:4C:97:EA:60:A8:09`
 
 ## Compilation Guide
 
