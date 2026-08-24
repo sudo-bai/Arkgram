@@ -13,4 +13,5 @@ TMessagesProj/.cxx/
 TMessagesProj/jniLibs/
 TMessagesProj/jniRes/
 TMessagesProj/afat/
+TMessagesProj/release.keystore
 TMessagesProj/jni/ffmpeg/build_android
