@@ -58,6 +58,7 @@
     <string name="DisableMarkdown">禁用 Markdown</string>
     <string name="SendWithMarkdown">启用 Markdown</string>
     <string name="TipsChannel">功能介绍频道</string>
+    <string name="NotCreated" translatable="false">暂未创建</string>
     <string name="ShowSmallGIF">GIF 显示得更小</string>
     <string name="DisableClickCommandToSend">点击机器人指令发送前确认</string>
     <string name="DisableDialogsFloatingButton">隐藏浮动按钮</string>
