@@ -10,6 +10,7 @@
     <color name="widget_edit_text">#999999</color>
     <color name="SplashBackground">#FFFFFFFF</color>
 
+    <color name="arkgram_icon_background">#000000</color>
     <color name="monetRedLight">#B3261E</color>
     <color name="monetRedDark">#F2B8B5</color>
     <color name="monetRedCall">#EF5350</color>
