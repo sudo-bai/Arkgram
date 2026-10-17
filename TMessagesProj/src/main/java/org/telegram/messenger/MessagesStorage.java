@@ -1569,7 +1569,7 @@ public class MessagesStorage extends BaseController {
                     cursor.dispose();
                 }
                 reset();
-                // NagramX
+                // Arkgram
                 if (restart) {
                     AndroidUtilities.runOnUIThread(() -> {
                         AppRestartHelper.triggerRebirth(ApplicationLoader.applicationContext, new Intent(ApplicationLoader.applicationContext, LaunchActivity.class));

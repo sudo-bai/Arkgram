@@ -551,7 +551,7 @@ object NaConfig {
             1
         )
 
-    // NagramX
+    // Arkgram
     val enableSaveDeletedMessages =
         addConfig(
             "EnableSaveDeletedMessages",

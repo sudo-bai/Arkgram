@@ -97,6 +97,23 @@ abstract class GenerateLocalizationUtilsJavaTask : DefaultTask() {
                     }
                 }
 
+                // Some fork languages only have regional string resources
+                // (for example values-zh-rCN and values-zh-rTW). Telegram
+                // represents 简体中文 as Locale("zh"), whose language tag has no
+                // region, so map such base languages to their default regional
+                // asset instead of falling back to English.
+                val tagsByLanguage = languageTags.groupBy { it.substringBefore('-') }
+                for ((language, tags) in tagsByLanguage) {
+                    if (language in languageTags) {
+                        continue;
+                    }
+                    java.append("            case \"")
+                    java.append(escapeJavaString(language))
+                    java.append("\": return \"")
+                    java.append(getLocalizationAssetName(tags.sorted().first()))
+                    java.appendLine("\";")
+                }
+
                 java.appendLine("            default: return null;")
                 java.appendLine("        }")
                 java.appendLine("    }")

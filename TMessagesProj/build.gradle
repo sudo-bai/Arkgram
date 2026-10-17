@@ -91,6 +91,13 @@ android {
     defaultConfig.applicationId = APP_PACKAGE
 
     androidResources {
+        // EmojiPack.java opens assets/emoji.pack with AssetManager.openFd() and mmaps it,
+        // which requires the asset to be stored uncompressed. Upstream declares
+        // `noCompress += "pack"` in the separate TMessagesProj_App* application modules;
+        // this fork removed those modules and builds TMessagesProj as the application, so
+        // the rule has to live here or emoji.pack gets deflated and startup crashes with
+        // FileNotFoundException: ... probably compressed.
+        noCompress += "pack"
         localeFilters += [
                 'en', 'ar', 'de', 'es', 'es-rES', 'fa-rIR', 'in-rID', 'it', 'it-rIT', 'ja-rJP',
                 'ko', 'nl', 'pl-rPL', 'pt-rBR', 'ru-rRU', 'tr-rTR', 'uk-rUA', 'vi-rVN', 'zh-rCN', 'zh-rTW'

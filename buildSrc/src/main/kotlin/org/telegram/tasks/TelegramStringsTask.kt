@@ -27,12 +27,17 @@ abstract class TelegramStringsTask : DefaultTask() {
     companion object {
         private val GENERATED_EXCLUSIONS = setOf(
             "AppName",
-            "AppNameBeta"
+            "AppNameBeta",
+            // Arkgram's AndroidManifest uses @string/Arkgram as android:label.
+            // Resource shrinker must keep it, otherwise the launcher label is
+            // removed and Android falls back to the application class name.
+            "Arkgram"
         )
 
         private val STABLE_IDS_EXCLUSIONS = setOf(
             "AppName",
-            "AppNameBeta"
+            "AppNameBeta",
+            "Arkgram"
         )
 
         private const val STRING_RESOURCE_ID_BASE = 0x7F0FFFFE

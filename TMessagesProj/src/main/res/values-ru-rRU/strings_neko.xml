@@ -191,7 +191,7 @@
     <string name="ShowIdAndDc">Показывать ID и DC в профиле</string>
     <string name="UseDefaultTheme">Использовать тему по умолчанию *</string>
     <string name="DialogsSettings">Настройки чатов</string>
-    <string name="NagramXPushService">Push-сервис</string>
+    <string name="ArkgramPushService">Push-сервис</string>
     <string name="DisableSystemAccount">Скрыть аккаунт в системе</string>
     <string name="FilterMenu">Меню фильтра диалогов</string>
     <string name="DisableProxyWhenVpnEnabled">Отключить прокси при включении VPN</string>

@@ -1,4 +1,4 @@
-// Arkgram (NagramX fork) custom group VoIP audio bitrate.
+// Arkgram (Arkgram fork) custom group VoIP audio bitrate.
 //
 // Upstream 13.x moved tgcalls into the TelegramMessenger/tgcalls submodule and
 // dropped the fork's `tgcalls::GroupInstanceCustomImpl::customAudioBitrate`

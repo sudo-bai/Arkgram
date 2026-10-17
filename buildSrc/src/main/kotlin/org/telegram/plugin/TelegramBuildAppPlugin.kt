@@ -26,15 +26,21 @@ class TelegramBuildAppPlugin : Plugin<Project> {
             val task = project.tasks.register<TelegramStringsTask>(
                 "generate${suffix}TelegramStrings"
             ) {
+                // Upstream's umbrella-app plugin only knows about the official
+                // strings.xml files. Arkgram is a single application module and
+                // its fork strings live in strings_na.xml, strings_nax.xml and
+                // strings_neko.xml. They must participate in the generated hash
+                // localization assets too; otherwise LocaleController.getString(
+                // R.string.*) returns "LOC_ERR:null" for every fork-only key.
                 stringsXml.from(
                     project.fileTree("src/main/res/values") {
-                        include("strings.xml")
+                        include("strings*.xml")
                     }
                 )
 
                 localizationFiles.from(
                     project.fileTree("src/main/res") {
-                        include("values-*/strings.xml")
+                        include("values-*/strings*.xml")
                     }
                 )
 

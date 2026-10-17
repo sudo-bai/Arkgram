@@ -4332,7 +4332,7 @@ public class NotificationsController extends BaseController implements Notificat
                         name = LocaleController.getString(R.string.NotificationHiddenName);
                     }
                 } else {
-                    name = LocaleController.getString(R.string.NagramX);
+                    name = LocaleController.getString(R.string.Arkgram);
                 }
                 replace = false;
             } else {
@@ -6391,7 +6391,7 @@ public class NotificationsController extends BaseController implements Notificat
             case 0:
                 return R.drawable.notification;
             case 1:
-                return R.drawable.nagramx_notification;
+                return R.drawable.arkgram_notification;
             case 2:
                 return R.drawable.nagram_notification;
             case 3:

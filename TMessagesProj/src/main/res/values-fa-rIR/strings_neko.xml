@@ -190,7 +190,7 @@
     <string name="ShowIdAndDc">نمایش شناسه (ID) / دیتاسنتر (DC) در پروفایل</string>
     <string name="UseDefaultTheme">استفاده از پوسته پیش‌فرض *</string>
     <string name="DialogsSettings">تنظیمات گفتگوها</string>
-    <string name="NagramXPushService">سرویس اعلان</string>
+    <string name="ArkgramPushService">سرویس اعلان</string>
     <string name="DisableSystemAccount">غیرفعال کردن حساب سیستمی</string>
     <string name="FilterMenu">منوی فیلتر گفتگوها</string>
     <string name="DisableProxyWhenVpnEnabled">غیرفعال کردن پروکسی هنگام روشن بودن VPN</string>

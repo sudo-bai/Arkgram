@@ -190,7 +190,7 @@
     <string name="ShowIdAndDc">プロファイルに ID / DC を表示</string>
     <string name="UseDefaultTheme">デフォルトテーマを使用 *</string>
     <string name="DialogsSettings">ダイアログ</string>
-    <string name="NagramXPushService">プッシュ通知サービス</string>
+    <string name="ArkgramPushService">プッシュ通知サービス</string>
     <string name="DisableSystemAccount">システムアカウントを無効化</string>
     <string name="FilterMenu">ダイアログフィルターメニュー</string>
     <string name="DisableProxyWhenVpnEnabled">VPN が有効な場合プロキシを無効化</string>

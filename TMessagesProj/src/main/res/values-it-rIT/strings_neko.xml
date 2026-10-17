@@ -190,7 +190,7 @@
     <string name="ShowIdAndDc">Mostra ID / DC nel profilo</string>
     <string name="UseDefaultTheme">Usa tema predefinito *</string>
     <string name="DialogsSettings">Finestre di dialogo</string>
-    <string name="NagramXPushService">Servizio Push</string>
+    <string name="ArkgramPushService">Servizio Push</string>
     <string name="DisableSystemAccount">Disabilita account di sistema</string>
     <string name="FilterMenu">Menu Filtro Dialoghi</string>
     <string name="DisableProxyWhenVpnEnabled">Disabilita proxy quando VPN è abilitato</string>

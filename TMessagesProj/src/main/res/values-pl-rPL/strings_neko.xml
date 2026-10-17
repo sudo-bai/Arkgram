@@ -190,7 +190,7 @@
     <string name="ShowIdAndDc">Pokaż ID / DC w profilu</string>
     <string name="UseDefaultTheme">Użyj motywu domyślnego *</string>
     <string name="DialogsSettings">Czaty</string>
-    <string name="NagramXPushService">Usługa powiadomień push</string>
+    <string name="ArkgramPushService">Usługa powiadomień push</string>
     <string name="DisableSystemAccount">Wyłącz konto systemowe</string>
     <string name="FilterMenu">Menu filtra czatów</string>
     <string name="DisableProxyWhenVpnEnabled">Wyłącz serwer proxy, gdy VPN jest włączony</string>

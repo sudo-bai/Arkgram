@@ -2040,7 +2040,7 @@ public class SecretChatHelper extends BaseController {
                                     FileLog.e(e);
                                 }
                                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setTitle(LocaleController.getString(R.string.NagramX));
+                                builder.setTitle(LocaleController.getString(R.string.Arkgram));
                                 builder.setMessage(LocaleController.getString(R.string.CreateEncryptedChatError));
                                 builder.setPositiveButton(LocaleController.getString(R.string.OK), null);
                                 builder.show().setCanceledOnTouchOutside(true);

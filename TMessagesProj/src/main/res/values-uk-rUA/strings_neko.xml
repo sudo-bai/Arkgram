@@ -190,7 +190,7 @@
     <string name="ShowIdAndDc">Показати ID/DC в профілі</string>
     <string name="UseDefaultTheme">Використовувати стандартну тему *</string>
     <string name="DialogsSettings">Чати</string>
-    <string name="NagramXPushService">Служба Push-сповіщень</string>
+    <string name="ArkgramPushService">Служба Push-сповіщень</string>
     <string name="DisableSystemAccount">Приховати акаунт у системі</string>
     <string name="FilterMenu">Меню фільтру діалогів</string>
     <string name="DisableProxyWhenVpnEnabled">Вимкнути проксі, коли увімкнено VPN</string>

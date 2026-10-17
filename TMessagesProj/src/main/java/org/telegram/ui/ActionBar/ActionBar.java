@@ -2033,7 +2033,7 @@ public class ActionBar extends FrameLayout implements FactorAnimator.Target, The
         requestLayout();
     }
 
-    // NagramX: use folder name as title
+    // Arkgram: use folder name as title
     public void setTitleAnimatedX(CharSequence title, Drawable rightDrawable, boolean forward, long duration) {
         if (titleTextView[0] == null || title == null) {
             setTitle(title, rightDrawable);

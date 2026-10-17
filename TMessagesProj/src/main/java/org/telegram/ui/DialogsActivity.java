@@ -7135,7 +7135,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
                 filterTabsView.resetTabId();
 
-                // NagramX: use folder name as title
+                // Arkgram: use folder name as title
                 if (dialogStoriesCell != null) {
                     dialogStoriesCell.setLogoTitle(actionBarTitleNax, true, animated && NaConfig.INSTANCE.getFolderNameAsTitle().Bool(), false);
                 }

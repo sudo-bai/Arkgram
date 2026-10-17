@@ -43,7 +43,7 @@ public class ChannelBoostsController {
                 if (error != null && fragment != null && "CHANNEL_PRIVATE".equals(error.text)) {
                     if (!(LaunchActivity.instance != null && LaunchActivity.instance.isFinishing())) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getContext(), fragment.getResourceProvider());
-                        builder.setTitle(LocaleController.getString(R.string.NagramX));
+                        builder.setTitle(LocaleController.getString(R.string.Arkgram));
                         Map<String, Integer> colorsReplacement = new HashMap<>();
                         colorsReplacement.put("info1", Theme.getColor(Theme.key_dialogTopBackground));
                         colorsReplacement.put("info2", Theme.getColor(Theme.key_dialogTopBackground));
