@@ -16,7 +16,6 @@ plugins {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
@@ -25,3 +24,16 @@ dependencyResolutionManagement {
 
 rootProject.name = "NagramX"
 include ':TMessagesProj'
+include ':jlatexmath'
+project(':jlatexmath').projectDir = file('TMessagesProj/lib/jlatexmath/jlatexmath')
+
+// media3 is consumed from source: androidx.media3.decoder.ffmpeg is not published
+// on Maven, and ffmpeg_jni.cc registers natives against it at JNI_OnLoad.
+gradle.ext.androidxMediaModulePrefix = 'TMessagesProj_Modules:media3:media-'
+apply from: file("TMessagesProj_Modules/media/core_settings.gradle")
+
+// AGP 9 built-in Kotlin collides with the media3 `lib-common-ktx` module applying the
+// standalone `kotlin-android` plugin ("Cannot add extension with name 'kotlin'"). The
+// submodule is upstream and read-only, so point that one project at a checked-in copy of
+// its build script under Tools/media3 instead of patching inside the submodule.
+project(':TMessagesProj_Modules:media3:media-lib-common-ktx').buildFileName = '../../../../Tools/media3/common_ktx.build.gradle'

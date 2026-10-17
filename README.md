@@ -24,6 +24,8 @@ Official APKs use the following Android signing certificate:
 
 2. Obtain API credentials (`TELEGRAM_APP_ID` and `TELEGRAM_APP_HASH`) from [Telegram Developer Portal](https://my.telegram.org/auth). Create `local.properties` in the project root with:
 
+You will require Android Studio 2025.1.4, Android NDK 27.2.12479018 and Android SDK 36.
+
    ```properties
    TELEGRAM_APP_ID=<your_telegram_app_id>
    TELEGRAM_APP_HASH=<your_telegram_app_hash>

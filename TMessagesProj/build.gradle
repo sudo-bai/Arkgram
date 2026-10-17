@@ -5,17 +5,32 @@ plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
-    id 'org.telegram.lottie-meta'
+    id 'org.telegram.build-plugin'
+    id 'org.telegram.build-app-plugin'
     id 'idea'
 }
 
 idea {
     module {
         excludeDirs += [
+            file('jni/td'),
             file('jni/third_party'),
+            file('jni/third_party/absl'),
+            file('jni/third_party/boringssl'),
+            file('jni/third_party/dav1d'),
+            file('jni/third_party/ffmpeg'),
+            file('jni/third_party/libvpx'),
+            file('jni/third_party/libyuv'),
+            file('jni/third_party/openh264'),
+            file('jni/third_party/xiph'),
+            file('jni/third_party/wamr'),
+            file('jni/third_party/libprisma'),
+            file('jni/third_party/boost-regex'),
+            file('jni/tgcalls'),
             file('jni/ffmpeg'),
             file('jni/tlottie'),
             file('jni/boringssl'),
+            file('jni/voip/webrtc'),
             file('jni/sqlite')
         ]
     }
@@ -56,12 +71,17 @@ pwd = pwd ?: System.getenv('ALIAS_PASS')
 def nativeTarget = System.getenv('NATIVE_TARGET') ?: ''
 
 if (nativeTarget == 'SKIP') {
+    // Disable the heavy native + JVM test tasks. Match precisely: a naive
+    // name.contains('test') also hits "crea-test-aging"/"genera-test-aging" tasks
+    // (createStagingCompatibleScreenManifests, generateStagingRFile) and breaks the
+    // staging variant.
     tasks.configureEach { task ->
-        if (
-            task.name.toLowerCase().contains('cmake') ||
-            task.name.toLowerCase().contains('jni') ||
-            task.name.toLowerCase().contains('test')
-        ) {
+        final String n = task.name.toLowerCase()
+        final boolean isNative = n.contains('cmake') || n.contains('jni') ||
+            n.startsWith('externalnativebuild') || n.startsWith('strip') && n.contains('debugsymbols')
+        final boolean isTest = n.startsWith('test') || n.startsWith('connected') ||
+            n.endsWith('unittest') || n.endsWith('androidtest')
+        if (isNative || isTest) {
             task.enabled = false
         }
     }
@@ -112,6 +132,10 @@ android {
             appHash = properties.getProperty('TELEGRAM_APP_HASH') ?: System.getenv('TELEGRAM_APP_HASH') ?: appHash
         }
 
+        vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
+
+        multiDexEnabled true
+
         buildConfigField 'String', 'BUILD_VERSION_STRING', '"' + verName + '"'
         buildConfigField 'String', 'OFFICIAL_VERSION', '"' + officialVer + '"'
         buildConfigField 'int', 'OFFICIAL_VERSION_CODE', officialCode + ''
@@ -121,7 +145,9 @@ android {
 
         externalNativeBuild {
             cmake {
+                version '3.22.1'
                 arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-27', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                targets 'tmessages.49'
                 System.getenv('PATH').split(File.pathSeparator).any { path ->
                     var file = Paths.get("${path}${File.separator}ccache${if (OperatingSystem.current().windows) ".exe" else ""}").toFile()
                     if (file.exists()) {
@@ -148,7 +174,6 @@ android {
 
     externalNativeBuild {
         cmake {
-            version = '3.31.6+'
             path = 'jni/CMakeLists.txt'
         }
     }
@@ -169,6 +194,8 @@ android {
             jniDebuggable = true
             multiDexEnabled = true
             signingConfig = signingConfigs.release
+            buildConfigField "boolean", "DEBUG_VERSION", "true"
+            buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "true"
         }
 
         staging {
@@ -180,6 +207,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['release', 'staging', 'debug']
             signingConfig = signingConfigs.release
+            buildConfigField "boolean", "DEBUG_VERSION", "true"
+            buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "true"
         }
 
         release {
@@ -191,12 +220,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['release', 'staging', 'debug']
             signingConfig = signingConfigs.release
+            buildConfigField "boolean", "DEBUG_VERSION", "false"
+            buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"
         }
     }
 
     sourceSets.main.jniLibs.srcDirs = ['./jni/']
 
     namespace = 'org.telegram.messenger'
+}
+
+// android.hardware.fingerprint.FingerprintManager was removed in API 37 (see
+// <sdk>/platforms/android-37.0/data/api-versions.xml: removed="37.0"), yet this fork compiles
+// with compileSdk 37 because androidx.core 1.19.0 declares minCompileSdk=37. Upstream builds
+// with compileSdk 36 and therefore never hits this. Wallet's API 23-29 unlock path still uses
+// the class directly, so './stubs' is put on javac's -sourcepath with -implicit:none: symbols
+// resolve for compilation, but no .class is generated and nothing reaches the APK.
+tasks.withType(JavaCompile).configureEach {
+    if (project.name == 'TMessagesProj') {
+        options.sourcepath = files('stubs')
+        options.compilerArgs += ['-implicit:none']
+    }
 }
 
 androidComponents {
@@ -218,6 +262,14 @@ configurations.configureEach {
     exclude group: 'androidx.recyclerview', module: 'recyclerview'
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    // org.unifiedpush.android:connector pulls com.google.crypto.tink:tink (JVM variant),
+    // while androidx.security:security-crypto (via recaptcha) pulls tink-android.
+    // Both ship the same classes; keep the Android variant only.
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'com.google.crypto.tink' && details.requested.name == 'tink') {
+            details.useTarget 'com.google.crypto.tink:tink-android:1.23.0'
+        }
+    }
 }
 
 dependencies {
@@ -231,6 +283,7 @@ dependencies {
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.interpolator:interpolator:1.0.0'
     implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.webkit:webkit:1.14.0'
     implementation 'androidx.car.app:app:1.7.0'
     implementation 'androidx.car.app:app-projected:1.7.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
@@ -238,12 +291,18 @@ dependencies {
     compileOnly 'org.checkerframework:checker-compat-qual:2.5.0'
     implementation 'com.google.firebase:firebase-messaging:25.1.2'
     implementation 'com.google.firebase:firebase-crashlytics:20.1.0'
+    implementation 'com.google.firebase:firebase-datatransport:18.1.0'
+    implementation 'com.google.firebase:firebase-appindexing:20.0.0'
     implementation 'com.google.android.gms:play-services-cast-framework:22.3.1'
     implementation 'com.google.android.gms:play-services-maps:20.0.0'
     implementation 'com.google.android.gms:play-services-auth:21.6.0'
     implementation 'com.google.android.gms:play-services-vision:20.1.3'
     implementation 'com.google.android.gms:play-services-wearable:20.0.1'
     implementation 'com.google.android.gms:play-services-location:21.4.0'
+    implementation 'com.google.android.gms:play-services-wallet:19.1.0'
+    implementation 'com.google.android.play:integrity:1.3.0'
+    implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
+    implementation 'com.neovisionaries:nv-websocket-client:2.14'
     implementation 'com.googlecode.mp4parser:isoparser:1.0.6'
     implementation 'com.google.mlkit:language-id:17.0.6'
     implementation 'com.google.code.gson:gson:2.14.0'
@@ -264,12 +323,25 @@ dependencies {
     implementation "io.noties.markwon:ext-tables:4.6.2"
     implementation "io.noties.markwon:html:4.6.2"
     implementation "io.noties.markwon:inline-parser:4.6.2"
-    implementation "io.noties.markwon:ext-latex:4.6.2"
+    implementation("io.noties.markwon:ext-latex:4.6.2") {
+        exclude group: 'ru.noties', module: 'jlatexmath-android'
+    }
+    api project(':jlatexmath')
+    implementation 'com.google.android.recaptcha:recaptcha:18.7.1'
+
+    // media3 is consumed from source (see settings.gradle): media3-decoder-ffmpeg is
+    // not published to Maven, yet ffmpeg_jni.cc registers JNI against it at load time.
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer")
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer-dash")
+    api project(":TMessagesProj_Modules:media3:media-lib-exoplayer-hls")
+    api project(":TMessagesProj_Modules:media3:media-lib-decoder-ffmpeg")
+    api project(":TMessagesProj_Modules:media3:media-lib-session")
+
     // payment
     implementation('com.stripe:stripe-android:2.0.2') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    implementation 'com.android.billingclient:billing:7.1.1'
+    implementation 'com.android.billingclient:billing:8.0.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'
 
     // kotlin

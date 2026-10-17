@@ -56,6 +56,11 @@ public final class TelegramQRCodeWriter {
     private int sideQuadSize;
 
     private int imageSize;
+    private Drawable centerDrawable;
+
+    public void setCenterDrawable(Drawable drawable) {
+        centerDrawable = drawable;
+    }
 
     public Bitmap encode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, Bitmap bitmap, Context context) throws WriterException {
         return encode(contents, format, width, height, hints, bitmap, context, null);
@@ -222,6 +227,9 @@ public final class TelegramQRCodeWriter {
             icon = iconF.apply(imageSize);
             canvas.drawBitmap(icon, imageX, imageX, null);
             icon.recycle();
+        } else if (centerDrawable != null) {
+            centerDrawable.setBounds(imageX, imageX, imageX + imageSize, imageX + imageSize);
+            centerDrawable.draw(canvas);
         } else {
             Drawable drawable = ApplicationLoader.applicationContext.getResources().getDrawable(R.mipmap.ic_launcher_nagram_blue);
             drawable.setBounds(imageX, imageX, imageX + imageSize, imageX + imageSize);

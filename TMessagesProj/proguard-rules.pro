@@ -7,6 +7,14 @@
 -keep class org.webrtc.audio.* { *; }
 -keep class org.webrtc.voiceengine.* { *; }
 -keep class org.telegram.messenger.* { *; }
+
+# android.hardware.fingerprint.FingerprintManager and Context.FINGERPRINT_SERVICE were
+# removed from the API 37 SDK (see api-versions.xml: removed="37.0"), but this fork compiles
+# with compileSdk 37 because androidx.core 1.19.0 requires it. The M-Q wallet unlock path in
+# org.telegram.ui.Wallet.GramWalletStorageAuth still uses the platform class, which exists at
+# runtime on API < 30. javac resolves it from TMessagesProj/stubs (source-only, not packaged),
+# so R8 only needs the references to be tolerated here.
+-dontwarn android.hardware.fingerprint.**
 -keep class org.telegram.messenger.camera.* { *; }
 -keep class org.telegram.messenger.secretmedia.* { *; }
 -keep class org.telegram.messenger.support.* { *; }
@@ -19,10 +27,6 @@
 -keep class org.telegram.tgnet.NativeByteBuffer { *; }
 -keep class org.telegram.tgnet.RequestTimeDelegate { *; }
 -keep class org.telegram.tgnet.RequestDelegate { *; }
--keep class com.google.android.exoplayer2.ext.** { *; }
--keep class com.google.android.exoplayer2.extractor.FlacStreamMetadata { *; }
--keep class com.google.android.exoplayer2.metadata.flac.PictureFrame { *; }
--keep class com.google.android.exoplayer2.decoder.SimpleDecoderOutputBuffer { *; }
 -keep class org.telegram.ui.ActionBar.* { *; }
 -keep class org.telegram.ui.Stories.recorder.FfmpegAudioWaveformLoader { *; }
 -keep class androidx.mediarouter.app.MediaRouteButton { *; }
@@ -42,68 +46,6 @@
 
 # https://developers.google.com/ml-kit/known-issues#android_issues
 -keep class com.google.mlkit.nl.languageid.internal.ThickLanguageIdentifier { *; }
-
-# Constant folding for resource integers may mean that a resource passed to this method appears to be unused. Keep the method to prevent this from happening.
--keep class com.google.android.exoplayer2.upstream.RawResourceDataSource {
-  public static android.net.Uri buildRawResourceUri(int);
-}
-
-# Methods accessed via reflection in DefaultExtractorsFactory
--dontnote com.google.android.exoplayer2.ext.flac.FlacLibrary
--keepclassmembers class com.google.android.exoplayer2.ext.flac.FlacLibrary {
-}
-
-# Some members of this class are being accessed from native methods. Keep them unobfuscated.
--keep class com.google.android.exoplayer2.decoder.VideoDecoderOutputBuffer {
-  *;
-}
-
--dontnote com.google.android.exoplayer2.ext.opus.LibopusAudioRenderer
--keepclassmembers class com.google.android.exoplayer2.ext.opus.LibopusAudioRenderer {
-  <init>(android.os.Handler, com.google.android.exoplayer2.audio.AudioRendererEventListener, com.google.android.exoplayer2.audio.AudioProcessor[]);
-}
--dontnote com.google.android.exoplayer2.ext.flac.LibflacAudioRenderer
--keepclassmembers class com.google.android.exoplayer2.ext.flac.LibflacAudioRenderer {
-  <init>(android.os.Handler, com.google.android.exoplayer2.audio.AudioRendererEventListener, com.google.android.exoplayer2.audio.AudioProcessor[]);
-}
--dontnote com.google.android.exoplayer2.ext.ffmpeg.FfmpegAudioRenderer
--keepclassmembers class com.google.android.exoplayer2.ext.ffmpeg.FfmpegAudioRenderer {
-  <init>(android.os.Handler, com.google.android.exoplayer2.audio.AudioRendererEventListener, com.google.android.exoplayer2.audio.AudioProcessor[]);
-}
-
-# Constructors accessed via reflection in DefaultExtractorsFactory
--dontnote com.google.android.exoplayer2.ext.flac.FlacExtractor
--keepclassmembers class com.google.android.exoplayer2.ext.flac.FlacExtractor {
-  <init>();
-}
-
-# Constructors accessed via reflection in DefaultDownloaderFactory
--dontnote com.google.android.exoplayer2.source.dash.offline.DashDownloader
--keepclassmembers class com.google.android.exoplayer2.source.dash.offline.DashDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
-}
--dontnote com.google.android.exoplayer2.source.hls.offline.HlsDownloader
--keepclassmembers class com.google.android.exoplayer2.source.hls.offline.HlsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
-}
--dontnote com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader
--keepclassmembers class com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloader {
-  <init>(android.net.Uri, java.util.List, com.google.android.exoplayer2.offline.DownloaderConstructorHelper);
-}
-
-# Constructors accessed via reflection in DownloadHelper
--dontnote com.google.android.exoplayer2.source.dash.DashMediaSource$Factory
--keepclasseswithmembers class com.google.android.exoplayer2.source.dash.DashMediaSource$Factory {
-  <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
-}
--dontnote com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory
--keepclasseswithmembers class com.google.android.exoplayer2.source.hls.HlsMediaSource$Factory {
-  <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
-}
--dontnote com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource$Factory
--keepclasseswithmembers class com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource$Factory {
-  <init>(com.google.android.exoplayer2.upstream.DataSource$Factory);
-}
 
 -keep class io.nano.tex.** {*;}
 
@@ -249,3 +191,13 @@
 -keepattributes *Annotation*
 -dontoptimize
 -dontobfuscate
+
+-keep @interface androidx.annotation.Keep
+-keep @androidx.annotation.Keep class * { *; }
+-keepclasseswithmembers class * { @androidx.annotation.Keep *; }
+
+-keep class org.telegram.utils.code.highlight.PrismaHighlighter {
+    private static native <methods>;
+}
+
+-keep class org.telegram.tgnet.** { *; }

@@ -76,7 +76,7 @@
 #include "rtc_base/time_utils.h"
 #include "rtc_base/trace_event.h"
 #include "system_wrappers/include/metrics.h"
-#include "../../../tgcalls/group/GroupInstanceCustomImpl.h"
+#include "../../../NekoAudioBitrate.h"
 
 #if WEBRTC_ENABLE_PROTOBUF
 #ifdef WEBRTC_ANDROID_PLATFORM_BUILD
@@ -1148,10 +1148,10 @@ class WebRtcVoiceSendChannel::WebRtcAudioSendStream : public AudioSource::Sink {
         max_send_bitrate_bps_, rtp_parameters_.encodings[0].max_bitrate_bps,
         *audio_codec_spec_);
 
-    if (tgcalls::GroupInstanceCustomImpl::customAudioBitrate != 0) {
-      config_.send_codec_spec->target_bitrate_bps = tgcalls::GroupInstanceCustomImpl::customAudioBitrate;
-      config_.max_bitrate_bps = tgcalls::GroupInstanceCustomImpl::customAudioBitrate;
-      config_.min_bitrate_bps = tgcalls::GroupInstanceCustomImpl::customAudioBitrate;
+    if (nekogram::customAudioBitrateBps != 0) {
+      config_.send_codec_spec->target_bitrate_bps = nekogram::customAudioBitrateBps;
+      config_.max_bitrate_bps = nekogram::customAudioBitrateBps;
+      config_.min_bitrate_bps = nekogram::customAudioBitrateBps;
     }
     UpdateAllowedBitrateRange();
 
