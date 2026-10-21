@@ -1,0 +1,92 @@
+name: Telegram bot check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check bot access
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect configured Telegram targets
+        env:
+          BOT_TOKEN: ${{ secrets.HELPER_BOT_TOKEN }}
+          TARGET: ${{ secrets.HELPER_BOT_TARGET }}
+          CANARY_TARGET: ${{ secrets.HELPER_BOT_CANARY_TARGET }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+
+          token = os.environ.get("BOT_TOKEN", "")
+          if not token:
+              raise SystemExit("HELPER_BOT_TOKEN is empty")
+
+          def api(method, **params):
+              query = urllib.parse.urlencode(params)
+              url = f"https://api.telegram.org/bot{token}/{method}"
+              if query:
+                  url += "?" + query
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      return json.load(response)
+              except Exception as error:
+                  body = ""
+                  if hasattr(error, "read"):
+                      body = error.read().decode("utf-8", "replace")
+                  return {"ok": False, "description": f"{error}: {body}"}
+
+          me_response = api("getMe")
+          me = me_response.get("result") or {}
+          bot_id = me.get("id")
+          print("BOT", json.dumps({
+              "ok": me_response.get("ok"),
+              "id": bot_id,
+              "username": me.get("username"),
+              "can_join_groups": me.get("can_join_groups"),
+          }, ensure_ascii=False))
+
+          targets = [
+              ("HELPER_BOT_TARGET", os.environ.get("TARGET", "")),
+              ("HELPER_BOT_CANARY_TARGET", os.environ.get("CANARY_TARGET", "")),
+          ]
+          seen = set()
+          for name, chat_id in targets:
+              if not chat_id:
+                  print(name, "EMPTY")
+                  continue
+              if chat_id in seen:
+                  print(name, "same_as_previous", chat_id)
+                  continue
+              seen.add(chat_id)
+
+              chat_response = api("getChat", chat_id=chat_id)
+              chat = chat_response.get("result") or {}
+              print(name, "getChat", json.dumps({
+                  "ok": chat_response.get("ok"),
+                  "error": chat_response.get("description"),
+                  "id": chat.get("id"),
+                  "type": chat.get("type"),
+                  "title": chat.get("title"),
+                  "username": chat.get("username"),
+                  "permissions": chat.get("permissions"),
+              }, ensure_ascii=False))
+
+              member_response = api("getChatMember", chat_id=chat_id, user_id=bot_id)
+              member = member_response.get("result") or {}
+              print(name, "getChatMember", json.dumps({
+                  "ok": member_response.get("ok"),
+                  "error": member_response.get("description"),
+                  "status": member.get("status"),
+                  "can_post_messages": member.get("can_post_messages"),
+                  "can_edit_messages": member.get("can_edit_messages"),
+                  "can_delete_messages": member.get("can_delete_messages"),
+                  "can_send_messages": member.get("can_send_messages"),
+                  "can_send_media_messages": member.get("can_send_media_messages"),
+              }, ensure_ascii=False))
+          PY
