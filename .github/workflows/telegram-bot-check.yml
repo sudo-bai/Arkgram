@@ -2,6 +2,11 @@ name: Telegram bot check
 
 on:
   workflow_dispatch:
+    inputs:
+      send_test:
+        description: 'Send a temporary test message to HELPER_BOT_TARGET'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -16,6 +21,7 @@ jobs:
           BOT_TOKEN: ${{ secrets.HELPER_BOT_TOKEN }}
           TARGET: ${{ secrets.HELPER_BOT_TARGET }}
           CANARY_TARGET: ${{ secrets.HELPER_BOT_CANARY_TARGET }}
+          SEND_TEST: ${{ inputs.send_test }}
         run: |
           python3 - <<'PY'
           import json
@@ -89,4 +95,28 @@ jobs:
                   "can_send_messages": member.get("can_send_messages"),
                   "can_send_media_messages": member.get("can_send_media_messages"),
               }, ensure_ascii=False))
+
+              if name == "HELPER_BOT_TARGET" and os.environ.get("SEND_TEST") == "true":
+                  sent = api(
+                      "sendMessage",
+                      chat_id=chat_id,
+                      text="Arkgram bot permission check",
+                      disable_notification=True,
+                  )
+                  sent_message = sent.get("result") or {}
+                  print(name, "sendMessage", json.dumps({
+                      "ok": sent.get("ok"),
+                      "error": sent.get("description"),
+                      "message_id": sent_message.get("message_id"),
+                  }, ensure_ascii=False))
+                  if sent.get("ok") and sent_message.get("message_id"):
+                      deleted = api(
+                          "deleteMessage",
+                          chat_id=chat_id,
+                          message_id=sent_message["message_id"],
+                      )
+                      print(name, "deleteMessage", json.dumps({
+                          "ok": deleted.get("ok"),
+                          "error": deleted.get("description"),
+                      }, ensure_ascii=False))
           PY
