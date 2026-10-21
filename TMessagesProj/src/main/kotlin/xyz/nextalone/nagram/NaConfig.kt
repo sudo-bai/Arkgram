@@ -1479,6 +1479,10 @@ object NaConfig {
         if (translatorMode.Int() !in 0..2) {
             translatorMode.setConfigInt(0)
         }
+        when (notificationIcon.Int()) {
+            2 -> notificationIcon.setConfigInt(1) // Removed legacy Nagram icon -> Arkgram
+            !in 0..3 -> notificationIcon.setConfigInt(notificationIcon.defaultValue as Int)
+        }
         if (!getPreferences().contains(idDcType.key) && !getPreferences().getBoolean(
                 "ShowIdAndDc", true
             )

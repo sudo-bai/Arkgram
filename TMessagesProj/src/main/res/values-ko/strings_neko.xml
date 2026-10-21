@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NekoSettings">N-설정</string>
+    <string name="NekoSettings">PRTS</string>
     <string name="IPv6">IPv6 우선 사용</string>
     <string name="MessageMenu">메시지 메뉴</string>
     <string name="HidePhone">전화번호 숨기기</string>

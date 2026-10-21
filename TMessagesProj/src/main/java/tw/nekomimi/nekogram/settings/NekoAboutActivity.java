@@ -8,7 +8,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.browser.Browser;
 import org.telegram.ui.Cells.TextSettingsCell;
@@ -17,7 +16,9 @@ import tw.nekomimi.nekogram.DatacenterActivity;
 
 public class NekoAboutActivity extends BaseNekoSettingsActivity {
 
-    private int xChannelRow;
+    private static final String OFFICIAL_CHANNEL_URL = "https://t.me/Arkgarm";
+    private static final long OFFICIAL_CHANNEL_ID = -1004480918790L;
+
     private int channelRow;
     private int channelTipsRow;
     private int sourceCodeRow;
@@ -28,7 +29,6 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
     protected void updateRows() {
         super.updateRows();
 
-        xChannelRow = addRow();
         channelRow = addRow();
         channelTipsRow = addRow();
         sourceCodeRow = addRow();
@@ -43,7 +43,10 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == xChannelRow || position == channelRow || position == channelTipsRow) {
+        if (position == channelRow) {
+            Browser.openUrl(getParentActivity(), OFFICIAL_CHANNEL_URL);
+            return;
+        } else if (position == channelTipsRow) {
             return;
         } else if (position == translationRow) {
             Browser.openUrl(getParentActivity(), "https://crowdin.com/project/NagramX");
@@ -69,10 +72,8 @@ public class NekoAboutActivity extends BaseNekoSettingsActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, boolean partial) {
             if (holder.getItemViewType() == TYPE_SETTINGS) {
                 TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
-                if (position == xChannelRow) {
-                    textCell.setTextAndValue(getString(R.string.XChannel), getString(R.string.NotCreated), false);
-                } else if (position == channelRow) {
-                    textCell.setTextAndValue(getString(R.string.OfficialChannel), getString(R.string.NotCreated), false);
+                if (position == channelRow) {
+                    textCell.setText(getString(R.string.OfficialChannel), false);
                 } else if (position == channelTipsRow) {
                     textCell.setTextAndValue(getString(R.string.TipsChannel), getString(R.string.NotCreated), false);
                 } else if (position == sourceCodeRow) {
