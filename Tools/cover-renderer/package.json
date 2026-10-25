@@ -1,0 +1,12 @@
+{
+  "name": "arkgram-cover-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render-cover.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.55.0"
+  }
+}

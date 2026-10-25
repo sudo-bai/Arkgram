@@ -1,11 +1,12 @@
-import os
 import contextlib
 import html
+import os
+import subprocess
 from pathlib import Path
 from sys import argv
 
 from pyrogram import Client
-from pyrogram.types import InputMediaDocument, LinkPreviewOptions
+from pyrogram.types import InputMediaDocument, InputMediaPhoto
 
 api_id = os.environ.get("APP_ID")
 api_hash = os.environ.get("APP_HASH")
@@ -23,6 +24,40 @@ def get_commit_info():
     commit_message = os.environ.get("COMMIT_MESSAGE") or "unknown"
     return commit_id, commit_url, commit_message
 
+def get_app_version_name() -> str:
+    version = os.environ.get("APP_VERSION_NAME")
+    if version:
+        return version.strip()
+
+    properties = Path("gradle.properties")
+    for line in properties.read_text(encoding="utf-8").splitlines():
+        key, separator, value = line.partition("=")
+        if separator and key.strip() == "APP_VERSION_NAME":
+            return value.strip()
+
+    raise RuntimeError("APP_VERSION_NAME is missing from gradle.properties")
+
+
+def render_cover() -> Path:
+    commit_id, _, _ = get_commit_info()
+    version = get_app_version_name()
+    output = artifacts_path / f"Arkgram-v{version}-{commit_id}-cover.png"
+    subprocess.run(
+        [
+            os.environ.get("NODE_BIN", "node"),
+            "Tools/cover-renderer/render-cover.mjs",
+            "--version",
+            version,
+            "--detail",
+            commit_id,
+            "--output",
+            str(output),
+        ],
+        check=True,
+    )
+    return output
+
+
 def get_caption() -> str:
     commit_id, commit_url, commit_message = get_commit_info()
     pre = "Test version." if test_version else "Release version."
@@ -31,7 +66,7 @@ def get_caption() -> str:
     caption += f"See commit details [{commit_id}]({commit_url})"
     return caption
 
-def get_document() -> list["InputMediaDocument"]:
+def get_document() -> list:
     documents = []
     abis = ["arm64-v8a", "universal"]
     for abi in abis:
@@ -43,10 +78,17 @@ def get_document() -> list["InputMediaDocument"]:
             )
     if not documents:
         raise FileNotFoundError("No APK artifacts found")
+
+    documents.insert(
+        0,
+        InputMediaPhoto(
+            media = str(render_cover()),
+        ),
+    )
     base_caption = get_caption()
     if base_caption and len(base_caption) > 1024:
         base_caption = base_caption[:1020] + "..."
-    documents[-1].caption = base_caption
+    documents[0].caption = base_caption
     return documents
 
 def get_metadata():

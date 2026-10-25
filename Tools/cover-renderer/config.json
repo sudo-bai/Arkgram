@@ -1,0 +1,31 @@
+{
+  "template": "coverC",
+  "fields": {
+    "decorativeText": "Arkgram",
+    "gilroyWord1": "ARKNIGHTS",
+    "gilroyWord2": "PRTS",
+    "gilroyWord4": "Rhodes Island"
+  },
+  "illustrations": [
+    {
+      "title": "可露希尔_1",
+      "image": "site/media/closure-1.png",
+      "remoteMatch": "7/7e/",
+      "scale": 120,
+      "position": {
+        "x": -117,
+        "y": 328
+      }
+    },
+    {
+      "title": "可露希尔_2",
+      "image": "site/media/closure-2.png",
+      "remoteMatch": "2/21/",
+      "scale": 100,
+      "position": {
+        "x": 347,
+        "y": -76
+      }
+    }
+  ]
+}
