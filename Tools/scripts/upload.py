@@ -6,7 +6,7 @@ from pathlib import Path
 from sys import argv
 
 from pyrogram import Client
-from pyrogram.types import InputMediaDocument, InputMediaPhoto
+from pyrogram.types import InputMediaDocument
 
 api_id = os.environ.get("APP_ID")
 api_hash = os.environ.get("APP_HASH")
@@ -79,16 +79,6 @@ def get_document() -> list:
     if not documents:
         raise FileNotFoundError("No APK artifacts found")
 
-    documents.insert(
-        0,
-        InputMediaPhoto(
-            media = str(render_cover()),
-        ),
-    )
-    base_caption = get_caption()
-    if base_caption and len(base_caption) > 1024:
-        base_caption = base_caption[:1020] + "..."
-    documents[0].caption = base_caption
     return documents
 
 def get_metadata():
@@ -109,17 +99,36 @@ def retry(func):
     return wrapper
 
 @retry
-async def send_to_channel(client: "Client", cid: str):
+async def send_cover(client: "Client", cid: str, cover: Path):
     with contextlib.suppress(ValueError):
         cid = int(cid)
-    documents = get_document()
-    print("Uploading to Telegram:", flush=True)
-    for document in documents:
-        print(f"- {document.media}", flush=True)
+    caption = get_caption()
+    if caption and len(caption) > 1024:
+        caption = caption[:1020] + "..."
+    await client.send_photo(
+        chat_id = cid,
+        photo = str(cover),
+        caption = caption,
+    )
+
+@retry
+async def send_apks(client: "Client", cid: str, documents: list):
+    with contextlib.suppress(ValueError):
+        cid = int(cid)
     await client.send_media_group(
         cid,
         media = documents,
     )
+
+async def send_to_channel(client: "Client", cid: str):
+    cover = render_cover()
+    documents = get_document()
+    print("Uploading to Telegram:", flush=True)
+    print(f"- {cover}", flush=True)
+    for document in documents:
+        print(f"- {document.media}", flush=True)
+    await send_cover(client, cid, cover)
+    await send_apks(client, cid, documents)
 
 @retry
 async def send_metadata(client: "Client", cid: str):
