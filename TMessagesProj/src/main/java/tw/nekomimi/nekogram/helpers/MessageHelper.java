@@ -1420,6 +1420,23 @@ public class MessageHelper extends BaseController {
         return true;
     }
 
+    public boolean shouldSendMessagesAsCopy(ArrayList<MessageObject> messages, long sourceDialogId) {
+        if (messages == null || messages.isEmpty()) {
+            return false;
+        }
+        boolean restricted = getMessagesController().isPeerNoForwards(sourceDialogId);
+        for (int i = 0; i < messages.size(); i++) {
+            MessageObject message = messages.get(i);
+            if (message == null || message.messageOwner == null || message.isAyuDeleted()) {
+                return false;
+            }
+            if (message.messageOwner.noforwards) {
+                restricted = true;
+            }
+        }
+        return restricted && canSendMessagesAsCopy(messages);
+    }
+
     private boolean canSendSingleMessageAsCopy(MessageObject messageObject) {
         if (messageObject == null || messageObject.messageOwner == null) {
             return false;

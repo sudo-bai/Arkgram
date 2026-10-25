@@ -8684,6 +8684,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private void showForward(ArrayList<MessageObject> fmessages, boolean noQuote) {
+        boolean forwardAsCopy = noQuote && !fmessages.isEmpty()
+            && MessageHelper.getInstance(currentAccount).shouldSendMessagesAsCopy(fmessages, fmessages.get(0).getDialogId());
         Bundle args = new Bundle();
         args.putBoolean("onlySelect", true);
         args.putInt("dialogsType", 3);
@@ -8696,7 +8698,13 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     if (message != null) {
                         SendMessagesHelper.getInstance(currentAccount).sendMessage(message.toString(), did, null, null, null, true, null, null, null, notify, scheduleDate, 0, null, false);
                     }
-                    SendMessagesHelper.getInstance(currentAccount).sendMessage(fmessages, did, noQuote, false, notify, scheduleDate, 0);
+                    if (forwardAsCopy) {
+                        if (!MessageHelper.getInstance(currentAccount).sendMessagesAsCopy(fmessages, did, null, null, null, notify, scheduleDate, ChatActivity.MODE_DEFAULT, null, 0, 0, 0, null)) {
+                            BulletinFactory.of(containerView, resourcesProvider).createErrorBulletin(getString(R.string.PleaseDownload)).show();
+                        }
+                    } else {
+                        SendMessagesHelper.getInstance(currentAccount).sendMessage(fmessages, did, noQuote, false, notify, scheduleDate, 0);
+                    }
                 }
                 fragment1.finishFragment();
                 if (parentChatActivityFinal != null) {
@@ -8713,6 +8721,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                 long did = topicKey.dialogId;
                 Bundle args1 = new Bundle();
                 args1.putBoolean("forward_noquote", noQuote);
+                args1.putBoolean("forward_messages_as_copy", forwardAsCopy);
                 args1.putBoolean("scrollToTopOnResume", true);
                 if (DialogObject.isEncryptedDialog(did)) {
                     args1.putInt("enc_id", DialogObject.getEncryptedChatId(did));

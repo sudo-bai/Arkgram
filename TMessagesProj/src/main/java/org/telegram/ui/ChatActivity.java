@@ -437,7 +437,7 @@ public class ChatActivity extends BaseFragment implements
         FactorAnimator.Target
 {
 
-    private MessageMenuStatus lastMessageMenuStatus = new MessageMenuStatus(false, false, false, false, false, false, false, false, false);
+    private MessageMenuStatus lastMessageMenuStatus = new MessageMenuStatus(false, false, false, false, false, false, false, false, false, false);
     private final static boolean PULL_DOWN_BACK_FRAGMENT = false;
     private final static boolean DISABLE_PROGRESS_VIEW = true;
     private final static int SKELETON_DISAPPEAR_MS = 200;
@@ -924,6 +924,7 @@ public class ChatActivity extends BaseFragment implements
     private CharSequence formwardingNameText;
     public MessageObject forwardingMessage;
     public MessageObject.GroupedMessages forwardingMessageGroup;
+    private boolean forwardingMessagesAsCopy;
     private MessageObject.GroupedMessages replyingQuoteGroup;
     public MessageObject replyingTopMessage;
     private ReplyQuote replyingQuote;
@@ -3039,6 +3040,7 @@ public class ChatActivity extends BaseFragment implements
         needRemovePreviousSameChatActivity = arguments.getBoolean("need_remove_previous_same_chat_activity", true);
         noForwardQuote = arguments.getBoolean("forward_noquote", false);
         noForwardCaption = arguments.getBoolean("forward_nocaption", false);
+        forwardingMessagesAsCopy = arguments.getBoolean("forward_messages_as_copy", false);
         justCreatedChat = arguments.getBoolean("just_created_chat", false);
         wallpaperRandomSeed = Utilities.random.nextLong();
         if (quickReplyShortcut != null) {
@@ -11103,7 +11105,7 @@ public class ChatActivity extends BaseFragment implements
         boolean canSendMessages = ChatObject.canSendMessages(currentChat);
         actionModeViews.add(actionModeOtherItem = actionMode.addItemWithWidth(nkactionbarbtn_action_mode_other, R.drawable.ic_ab_other, dp(54), LocaleController.getString(R.string.MessageMenu)));
 
-        if (currentEncryptedChat == null && !noforward) {
+        if (currentEncryptedChat == null) {
             actionModeOtherItem.addSubItem(nkbtn_forward_noquote, R.drawable.msg_forward_noquote, LocaleController.getString(R.string.NoQuoteForward));
         }
         actionModeOtherItem.addSubItem(nkbtn_translate, LlmConfig.llmIsDefaultProvider() ? R.drawable.magic_stick_solar : R.drawable.ic_translate, LocaleController.getString(R.string.Translate));
@@ -13193,9 +13195,26 @@ public class ChatActivity extends BaseFragment implements
         updateSelectedMessageReactions();
     }
 
+    private ArrayList<MessageObject> getMessagesForForwarding() {
+        ArrayList<MessageObject> messages = new ArrayList<>();
+        if (forwardingMessage != null) {
+            if (forwardingMessageGroup != null) {
+                messages.addAll(forwardingMessageGroup.messages);
+            } else {
+                messages.add(forwardingMessage);
+            }
+        } else {
+            messages.addAll(getSelectedMessages1());
+        }
+        return messages;
+    }
+
     public void openForward(boolean fromActionBar) {
         boolean hasSelectedAyuDeletedMessage = hasSelectedAyuDeletedMessage();
-        if (isPeerNoForwards() || hasSelectedNoforwardsMessage() || hasSelectedAyuDeletedMessage) {
+        boolean noforwards = isPeerNoForwards() || hasSelectedNoforwardsMessage() || hasSelectedAyuDeletedMessage;
+        boolean sendAsCopy = noForwardQuote && !noForwardCaption
+            && getMessageHelper().shouldSendMessagesAsCopy(getMessagesForForwarding(), dialog_id);
+        if (noforwards && !sendAsCopy) {
             // We should update text if user changed locale without re-opening chat activity
             String str;
             if (isPeerNoForwards()) {
@@ -15725,7 +15744,16 @@ public class ChatActivity extends BaseFragment implements
                 if (messagePreviewParams.forwardMessages != null) {
                     messagePreviewParams.forwardMessages.getSelectedMessages(messagesToForward);
                 }
-                forwardMessages(messagesToForward, messagePreviewParams.hideForwardSendersName, messagePreviewParams.hideCaption, notify, scheduleDate != 0 && scheduleDate != 0x7ffffffe ? scheduleDate + 1 : scheduleDate, payStars);
+                final int sendScheduleDate = scheduleDate != 0 && scheduleDate != 0x7ffffffe ? scheduleDate + 1 : scheduleDate;
+                if (forwardingMessagesAsCopy) {
+                    forwardingMessagesAsCopy = false;
+                    MessageObject replyTo = replyingMessageObject != null && replyingMessageObject != threadMessageObject ? replyingMessageObject : null;
+                    if (!getMessageHelper().sendMessagesAsCopy(messagesToForward, dialog_id, replyTo, getThreadMessage(), replyingQuote, notify, sendScheduleDate, chatMode, quickReplyShortcut, getQuickReplyId(), payStars, getSendMonoForumPeerId(), getSendMessageSuggestionParams())) {
+                        BulletinFactory.of(this).createErrorBulletin(getString(R.string.PleaseDownload), themeDelegate).show();
+                    }
+                } else {
+                    forwardMessages(messagesToForward, messagePreviewParams.hideForwardSendersName, messagePreviewParams.hideCaption, notify, sendScheduleDate, payStars);
+                }
             // }
             messagePreviewParams = null;
         }
@@ -20299,6 +20327,8 @@ public class ChatActivity extends BaseFragment implements
                 boolean hasSelectedAyuDeletedMessage = hasSelectedAyuDeletedMessage();
                 boolean noforwards = isPeerNoForwards() || hasSelectedNoforwardsMessage() || hasSelectedAyuDeletedMessage;
                 boolean canForward = chatMode != MODE_SCHEDULED && cantForwardMessagesCount == 0 && !noforwards;
+                boolean canForwardAsCopy = chatMode != MODE_SCHEDULED && !hasSelectedAyuDeletedMessage
+                    && getMessageHelper().shouldSendMessagesAsCopy(getSelectedMessages1(), dialog_id);
                 boolean showForward = NaConfig.INSTANCE.getActionBarButtonForward().Bool();
                 boolean canSendMessage = ChatObject.canSendMessages(currentChat);
                 boolean canReport = false;
@@ -20310,7 +20340,7 @@ public class ChatActivity extends BaseFragment implements
                     }
                 }
                 if (forwardNoQuoteItem != null) {
-                    forwardNoQuoteItem.setVisibility(canForward && NaConfig.INSTANCE.getShowNoQuoteForward().Bool());
+                    forwardNoQuoteItem.setVisibility((canForward || canForwardAsCopy) && NaConfig.INSTANCE.getShowNoQuoteForward().Bool());
                 }
                 if (saveMessageItem != null) {
                     saveMessageItem.setVisibility(canForward);
@@ -33738,7 +33768,7 @@ public class ChatActivity extends BaseFragment implements
                 if (GroupedIconsView.useGroupedIcons()) {
                     popupLayout.addView(new ActionBarPopupWindow.GapView(contentView.getContext(), themeDelegate), LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 8));
 
-                    var groupedIconsView = new GroupedIconsView(getContext(), ChatActivity.this, selectedObject, this.lastMessageMenuStatus.allowReply, this.lastMessageMenuStatus.allowReplyPm, this.lastMessageMenuStatus.allowEdit, this.lastMessageMenuStatus.allowDelete, this.lastMessageMenuStatus.allowForward, this.lastMessageMenuStatus.allowCopy, this.lastMessageMenuStatus.allowCopyPhoto, this.lastMessageMenuStatus.allowCopyLink, this.lastMessageMenuStatus.allowCopyLinkPm);
+                    var groupedIconsView = new GroupedIconsView(getContext(), ChatActivity.this, selectedObject, this.lastMessageMenuStatus.allowReply, this.lastMessageMenuStatus.allowReplyPm, this.lastMessageMenuStatus.allowEdit, this.lastMessageMenuStatus.allowDelete, this.lastMessageMenuStatus.allowForward, this.lastMessageMenuStatus.allowForwardNoquote, this.lastMessageMenuStatus.allowCopy, this.lastMessageMenuStatus.allowCopyPhoto, this.lastMessageMenuStatus.allowCopyLink, this.lastMessageMenuStatus.allowCopyLinkPm);
                     popupLayout.addView(groupedIconsView.linearLayout);
                 }
 
@@ -36392,6 +36422,8 @@ public class ChatActivity extends BaseFragment implements
                 }
             }
         }
+        boolean forwardAsCopy = noForwardQuote && !noForwardCaption
+            && getMessageHelper().shouldSendMessagesAsCopy(fmessages, dialog_id);
         for (int j = 0; j < dids.size(); j++) {
             TLRPC.Chat chat = getMessagesController().getChat(-dids.get(j).dialogId);
             if (chat != null) {
@@ -36437,7 +36469,13 @@ public class ChatActivity extends BaseFragment implements
                         params.payStars = price == null ? 0 : price;
                         getSendMessagesHelper().sendMessage(params);
                     }
-                    forwardMessages(fmessages, noForwardQuote, noForwardCaption, notify, scheduleDate, did, price == null ? 0 : price);
+                    if (forwardAsCopy) {
+                        if (!getMessageHelper().sendMessagesAsCopy(fmessages, did, null, null, null, notify, scheduleDate, chatMode, quickReplyShortcut, getQuickReplyId(), price == null ? 0 : price, getSendMonoForumPeerId(), getSendMessageSuggestionParams())) {
+                            BulletinFactory.of(this).createErrorBulletin(getString(R.string.PleaseDownload), themeDelegate).show();
+                        }
+                    } else {
+                        forwardMessages(fmessages, noForwardQuote, noForwardCaption, notify, scheduleDate, did, price == null ? 0 : price);
+                    }
                     // getSendMessagesHelper().sendMessage(fmessages, did, false, false, notify, scheduleDate, scheduleRepeatPeriod, null, -1, price == null ? 0 : price, getSendMonoForumPeerId(), getSendMessageSuggestionParams());
                     if (message != null && NekoConfig.sendCommentAfterForward.Bool()) {
                         final SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, notify, scheduleDate, scheduleRepeatPeriod, null, false);
@@ -36481,6 +36519,7 @@ public class ChatActivity extends BaseFragment implements
                 Bundle args = new Bundle();
                 args.putBoolean("forward_noquote", noForwardQuote);
                 args.putBoolean("forward_nocaption", noForwardCaption);
+                args.putBoolean("forward_messages_as_copy", forwardAsCopy);
                 args.putBoolean("scrollToTopOnResume", scrollToTopOnResume);
                 if (DialogObject.isEncryptedDialog(did)) {
                     args.putInt("enc_id", DialogObject.getEncryptedChatId(did));
@@ -36535,6 +36574,7 @@ public class ChatActivity extends BaseFragment implements
                         };
                         chatActivity.showFieldPanelForReplyQuote(replyingMessageObject, replyingQuote);
                     } else {
+                        chatActivity.forwardingMessagesAsCopy = forwardAsCopy;
                         chatActivity.showFieldPanelForForward(true, fmessages);
                     }
                     if (chatActivity.getDialogId() == getDialogId() && !AndroidUtilities.isTablet()) {
@@ -36563,6 +36603,7 @@ public class ChatActivity extends BaseFragment implements
                 if (fragment.isQuote && replyingMessageObject != null) {
                     showFieldPanelForReplyQuote(replyingMessageObject, replyingQuote);
                 } else {
+                    forwardingMessagesAsCopy = forwardAsCopy;
                     showFieldPanelForForward(true, fmessages);
                 }
                 if (AndroidUtilities.isTablet()) {
@@ -48728,6 +48769,7 @@ public class ChatActivity extends BaseFragment implements
         boolean allowReply = false;
         boolean allowReplyPm = false;
         boolean allowForward = false;
+        boolean allowForwardNoquote = false;
 
         boolean isMessageTextEmpty = selectedObject.messageOwner == null || TextUtils.isEmpty(selectedObject.messageOwner.message);
         boolean isStaticSticker = type == MESSAGE_TYPE_STICKER_PACK_NOT_INSTALLED && !selectedObject.isAnimatedSticker() && !selectedObject.isVideoSticker();
@@ -49317,13 +49359,14 @@ public class ChatActivity extends BaseFragment implements
                         icons.add(R.drawable.msg_unfave);
                     }
                 }
-                final boolean canForward = !selectedObject.isSponsored()
+                final boolean canShareForwardedContent = !selectedObject.isSponsored()
                     && !isQuickRepliesOrWelcomeMessagesMode()
                     && chatMode != MODE_SCHEDULED
                     && (!selectedObject.needDrawBluredPreview() || selectedObject.hasExtendedMediaPreview())
                     && !selectedObject.isLiveLocation()
+                    && !isAyuDeleted
                     && selectedObject.type != MessageObject.TYPE_PHONE_CALL
-                    && !noforwards && selectedObject.type != MessageObject.TYPE_SHARING_OFFER
+                    && selectedObject.type != MessageObject.TYPE_SHARING_OFFER
                     && selectedObject.type != MessageObject.TYPE_GIFT_PREMIUM
                     && selectedObject.type != MessageObject.TYPE_GIFT_OFFER
                     && selectedObject.type != MessageObject.TYPE_COMMUNITY_CHANGED
@@ -49334,6 +49377,9 @@ public class ChatActivity extends BaseFragment implements
                     && !message.isExpiredStory()
                     && message.type != MessageObject.TYPE_STORY_MENTION
                     && message.type != MessageObject.TYPE_GIFT_STARS;
+                final boolean canForward = canShareForwardedContent && !noforwards;
+                final boolean canForwardAsCopy = canShareForwardedContent && noforwards
+                    && getMessageHelper().canSendMessageAsCopy(selectedObject, selectedObjectGroup);
                 if (canForward) {
                     allowForward = true;
                     if (!GroupedIconsView.useGroupedIcons() || allowEdit) {
@@ -49345,7 +49391,8 @@ public class ChatActivity extends BaseFragment implements
                 // --- Arkgram Start ---
                 if (chatMode != MODE_SCHEDULED) {
                     if (chatMode != MODE_WELCOME_MESSAGES && !selectedObject.needDrawBluredPreview() && !selectedObject.isLiveLocation() && selectedObject.type != 16) {
-                        if (!noforwards && NaConfig.INSTANCE.getShowNoQuoteForward().Bool()) {
+                        if ((canForward || canForwardAsCopy) && NaConfig.INSTANCE.getShowNoQuoteForward().Bool()) {
+                            allowForwardNoquote = true;
                             items.add(LocaleController.getString(R.string.NoQuoteForward));
                             options.add(nkbtn_forward_noquote);
                             icons.add(R.drawable.msg_forward_noquote);
@@ -49737,7 +49784,7 @@ public class ChatActivity extends BaseFragment implements
             options.add(nkbtn_detail);
             icons.add(R.drawable.msg_info);
         }
-        this.lastMessageMenuStatus = new MessageMenuStatus(allowCopy, allowCopyPhoto, allowCopyLink, allowCopyLinkPm, allowDelete, allowEdit, allowReply, allowReplyPm, allowForward);
+        this.lastMessageMenuStatus = new MessageMenuStatus(allowCopy, allowCopyPhoto, allowCopyLink, allowCopyLinkPm, allowDelete, allowEdit, allowReply, allowReplyPm, allowForward, allowForwardNoquote);
     }
 
     private boolean showWelcomeMessageRevertOption(MessageObject messageObject) {
@@ -49829,7 +49876,7 @@ public class ChatActivity extends BaseFragment implements
                                      boolean allowCopyLink, boolean allowCopyLinkPm,
                                      boolean allowDelete, boolean allowEdit,
                                      boolean allowReply, boolean allowReplyPm,
-                                     boolean allowForward) {
+                                     boolean allowForward, boolean allowForwardNoquote) {
     }
 
     public boolean isBlockedUser(long senderId) {

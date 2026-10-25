@@ -69,7 +69,7 @@ public class ChatsHelper extends BaseController {
         if (action == LEFT_BUTTON_SELECT_BETWEEN) {
             return canSelectBetweenMessages ? LEFT_BUTTON_SELECT_BETWEEN : LEFT_BUTTON_REPLY;
         }
-        if (noForwards) {
+        if (noForwards && action != LEFT_BUTTON_NOQUOTE) {
             return LEFT_BUTTON_REPLY;
         }
         return switch (action) {
