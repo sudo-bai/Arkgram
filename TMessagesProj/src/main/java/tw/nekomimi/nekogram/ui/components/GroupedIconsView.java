@@ -47,7 +47,7 @@ public class GroupedIconsView extends FrameLayout {
     public GroupedIconsView(Context context, ChatActivity chatActivity, MessageObject messageObject,
                             boolean allowReply, boolean allowReplyPm,
                             boolean allowEdit, boolean allowDelete, boolean allowForward,
-                            boolean allowCopy, boolean allowCopyPhoto,
+                            boolean allowForwardNoquote, boolean allowCopy, boolean allowCopyPhoto,
                             boolean allowCopyLink, boolean allowCopyLinkPm
     ) {
         super(context);
@@ -104,11 +104,19 @@ public class GroupedIconsView extends FrameLayout {
             options.add(new OptionConfig(R.drawable.msg_link, OPTION_COPY_LINK, allowCopyLink));
         }
 
-        // button 4: edit > forward
+        // button 4: edit > forward > no-quote copy
         if (allowEdit) {
             options.add(new OptionConfig(R.drawable.msg_edit, OPTION_EDIT));
-        } else {
-            options.add(new OptionConfig(R.drawable.msg_forward_noquote, OPTION_FORWARD, OPTION_FORWARD_NOQUOTE, allowForward, allowForward));
+        } else if (allowForward) {
+            options.add(new OptionConfig(
+                R.drawable.msg_forward,
+                OPTION_FORWARD,
+                allowForwardNoquote ? OPTION_FORWARD_NOQUOTE : null,
+                true,
+                allowForwardNoquote
+            ));
+        } else if (allowForwardNoquote) {
+            options.add(new OptionConfig(R.drawable.msg_forward_noquote, OPTION_FORWARD_NOQUOTE));
         }
 
         for (OptionConfig config : options) {

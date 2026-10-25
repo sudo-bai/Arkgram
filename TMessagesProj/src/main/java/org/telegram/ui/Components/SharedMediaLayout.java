@@ -3922,15 +3922,33 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
             return;
         }
         boolean noforwards = profileActivity.getMessagesController().isPeerNoForwards(dialog_id);
+        boolean noQuoteAsCopy = noforwards && canSendSelectedFilesAsCopy();
         forwardItem.setAlpha(noforwards ? 0.5f : 1f);
-        forwardNoQuoteItem.setAlpha(noforwards ? 0.5f : 1f);
+        forwardNoQuoteItem.setAlpha(noforwards && !noQuoteAsCopy ? 0.5f : 1f);
         if (noforwards) {
             if (forwardItem.getBackground() != null) forwardItem.setBackground(null);
-            if (forwardNoQuoteItem.getBackground() != null) forwardNoQuoteItem.setBackground(null);
+            if (noQuoteAsCopy) {
+                forwardNoQuoteItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 5));
+            } else if (forwardNoQuoteItem.getBackground() != null) {
+                forwardNoQuoteItem.setBackground(null);
+            }
         } else if (forwardItem.getBackground() == null) {
             forwardItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 5));
             forwardNoQuoteItem.setBackground(Theme.createSelectorDrawable(getThemedColor(Theme.key_actionBarActionModeDefaultSelector), 5));
         }
+    }
+
+    private boolean canSendSelectedFilesAsCopy() {
+        ArrayList<MessageObject> messages = new ArrayList<>();
+        for (int a = 1; a >= 0; a--) {
+            for (int b = 0; b < selectedFiles[a].size(); b++) {
+                MessageObject message = selectedFiles[a].valueAt(b);
+                if (message != null) {
+                    messages.add(message);
+                }
+            }
+        }
+        return profileActivity.getMessageHelper().shouldSendMessagesAsCopy(messages, dialog_id);
     }
     private boolean hasNoforwardsMessage() {
         boolean hasNoforwardsMessage = false;
@@ -5332,32 +5350,35 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                 cantDeleteMessagesCount = 0;
             }, null, resourcesProvider);
         } else if (id == forward || id == forward_noquote) {
-            if (userInfo != null) {
-                if (profileActivity.getMessagesController().isUserNoForwards(userInfo)) {
+            boolean forwardAsCopyRequest = id == forward_noquote && canSendSelectedFilesAsCopy();
+            if (!forwardAsCopyRequest) {
+                if (userInfo != null) {
+                    if (profileActivity.getMessagesController().isUserNoForwards(userInfo)) {
+                        if (fwdRestrictedHint != null) {
+                            fwdRestrictedHint.setText(getString(R.string.ForwardsRestrictedInfoUser));
+                            fwdRestrictedHint.showForView(v, true);
+                        }
+                        return;
+                    }
+                }
+                if (info != null) {
+                    TLRPC.Chat chat = profileActivity.getMessagesController().getChat(info.id);
+                    if (profileActivity.getMessagesController().isChatNoForwards(chat)) {
+                        if (fwdRestrictedHint != null) {
+                            fwdRestrictedHint.setText(ChatObject.isChannel(chat) && !chat.megagroup ? getString(R.string.ForwardsRestrictedInfoChannel) :
+                                    getString(R.string.ForwardsRestrictedInfoGroup));
+                            fwdRestrictedHint.showForView(v, true);
+                        }
+                        return;
+                    }
+                }
+                if (hasNoforwardsMessage()) {
                     if (fwdRestrictedHint != null) {
-                        fwdRestrictedHint.setText(getString(R.string.ForwardsRestrictedInfoUser));
+                        fwdRestrictedHint.setText(getString("ForwardsRestrictedInfoBot", R.string.ForwardsRestrictedInfoBot));
                         fwdRestrictedHint.showForView(v, true);
                     }
                     return;
                 }
-            }
-            if (info != null) {
-                TLRPC.Chat chat = profileActivity.getMessagesController().getChat(info.id);
-                if (profileActivity.getMessagesController().isChatNoForwards(chat)) {
-                    if (fwdRestrictedHint != null) {
-                        fwdRestrictedHint.setText(ChatObject.isChannel(chat) && !chat.megagroup ? getString(R.string.ForwardsRestrictedInfoChannel) :
-                                getString(R.string.ForwardsRestrictedInfoGroup));
-                        fwdRestrictedHint.showForView(v, true);
-                    }
-                    return;
-                }
-            }
-            if (hasNoforwardsMessage()) {
-                if (fwdRestrictedHint != null) {
-                    fwdRestrictedHint.setText(getString("ForwardsRestrictedInfoBot", R.string.ForwardsRestrictedInfoBot));
-                    fwdRestrictedHint.showForView(v, true);
-                }
-                return;
             }
 
             Bundle args = new Bundle();
@@ -5380,6 +5401,8 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                     }
                     selectedFiles[a].clear();
                 }
+                boolean forwardAsCopy = id == forward_noquote
+                    && profileActivity.getMessageHelper().shouldSendMessagesAsCopy(fmessages, dialog_id);
                 cantDeleteMessagesCount = 0;
                 showActionMode(false);
                 if (savedDialogsAdapter != null) {
@@ -5393,7 +5416,13 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                         if (message != null) {
                             profileActivity.getSendMessagesHelper().sendMessage(SendMessagesHelper.SendMessageParams.of(message.toString(), did, null, null, null, true, null, null, null, true, 0, 0, null, false));
                         }
-                        profileActivity.getSendMessagesHelper().sendMessage(fmessages, did, id == forward_noquote, false, true, 0, 0);
+                        if (forwardAsCopy) {
+                            if (!profileActivity.getMessageHelper().sendMessagesAsCopy(fmessages, did, null, null, null, true, 0, ChatActivity.MODE_DEFAULT, null, 0, 0, 0, null)) {
+                                BulletinFactory.of(profileActivity).createErrorBulletin(getString(R.string.PleaseDownload)).show();
+                            }
+                        } else {
+                            profileActivity.getSendMessagesHelper().sendMessage(fmessages, did, id == forward_noquote, false, true, 0, 0);
+                        }
                     }
                     fragment1.finishFragment();
                     UndoView undoView = null;
@@ -5413,6 +5442,7 @@ public class SharedMediaLayout extends FrameLayout implements NotificationCenter
                     if (id == forward_noquote) {
                         args1.putBoolean("forward_noquote", true);
                     }
+                    args1.putBoolean("forward_messages_as_copy", forwardAsCopy);
                     args1.putBoolean("scrollToTopOnResume", true);
                     if (DialogObject.isEncryptedDialog(did)) {
                         args1.putInt("enc_id", DialogObject.getEncryptedChatId(did));
