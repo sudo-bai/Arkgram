@@ -15,4 +15,5 @@
     <color name="monetRedDark">#F2B8B5</color>
     <color name="monetRedCall">#EF5350</color>
     <color name="monetGreenCall">#4CAF50</color>
+    <color name="arkgram_launcher_background">#212121</color>
 </resources>
