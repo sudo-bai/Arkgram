@@ -6392,8 +6392,6 @@ public class NotificationsController extends BaseController implements Notificat
                 return R.drawable.notification;
             case 1:
                 return R.drawable.arkgram_notification;
-            case 2:
-                return R.drawable.nagram_notification;
             case 3:
                 return R.drawable.neko_notification;
         }

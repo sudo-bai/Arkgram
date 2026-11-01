@@ -15,3 +15,4 @@ TMessagesProj/jniRes/
 TMessagesProj/afat/
 TMessagesProj/release.keystore
 TMessagesProj/jni/ffmpeg/build_android
+node_modules/

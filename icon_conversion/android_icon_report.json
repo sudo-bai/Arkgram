@@ -1,0 +1,75 @@
+{
+  "input": "/home/skadi/下载/图标.jpeg",
+  "input_sha256": "70e54357a53c330509f08efd4fa31e7281e6cc0b9ebbc33d35ae6a731fe20a88",
+  "parameters": {
+    "blur_sigma": 1.5,
+    "otsu_threshold": 126.0,
+    "min_feature_area": 20,
+    "potrace_unit": 10
+  },
+  "source_white_bbox_px": [
+    197,
+    460,
+    1843,
+    1601
+  ],
+  "source_white_size_px": [
+    1646,
+    1141
+  ],
+  "adaptive": {
+    "viewport_dp": 108.0,
+    "safe_zone_dp": 66.0,
+    "visible_target_dp": 64.0,
+    "fit_scale_source_to_dp": 0.038882138517618466,
+    "vector_group_transform": "android:scaleX=\"0.0038882139\" android:scaleY=\"-0.0038882139\" android:translateX=\"14.3402187120\" android:translateY=\"93.5625759417\"",
+    "rendered_bbox_px_at_1080": [
+      220,
+      318,
+      860,
+      762
+    ],
+    "rendered_bbox_dp": [
+      22.0,
+      31.8,
+      86.0,
+      76.2
+    ],
+    "bbox_inside_66dp_safe_zone": true,
+    "expected_target_zone_px": [
+      220.0,
+      860.0
+    ],
+    "foreground_fully_transparent_outside_content": true,
+    "background_color": "#000000",
+    "foreground_layer": "white linework only; no black disk or background",
+    "monochrome_layer": "same alpha mask as foreground; tinted by the system"
+  },
+  "play_store": {
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "bytes": 29922,
+    "max_bytes": 1048576,
+    "alpha_min": 255,
+    "alpha_max": 255,
+    "opaque": true,
+    "pre_rounded": false,
+    "shadow_baked_in": false
+  },
+  "outputs": {
+    "play_store": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_play_store_512.png",
+    "adaptive_foreground_svg": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_adaptive_foreground.svg",
+    "adaptive_foreground_vector": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon_foreground.xml",
+    "adaptive_monochrome_vector": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon_monochrome.xml",
+    "adaptive_preview": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_adaptive_preview.png"
+  },
+  "sha256": {
+    "play_store": "223757c0d88d15948fe4763cdce45907e31b3a87b58dd686b677f0a79684caf0",
+    "adaptive_foreground_svg": "7af486f788bb5c54ac8ff4568e75153e3c264a5dda5a8db8ada782575ef87918",
+    "adaptive_foreground_vector": "7b467acd4292dfb0938214b4d604e12c47a85d065407ffbfecc6e4ffdc83dd95",
+    "adaptive_monochrome_vector": "7b467acd4292dfb0938214b4d604e12c47a85d065407ffbfecc6e4ffdc83dd95"
+  }
+}

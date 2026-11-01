@@ -1,0 +1,1 @@
+const e="20261023184734";function o(t){const c=t.startsWith("/")?t.slice(1):t,n=c.includes("?")?"&":"?";return`/${c}${n}_v=${e}`}async function r(t,c={}){const n=o(t),s={...c,cache:"no-cache"};return fetch(n,s)}export{r as f};

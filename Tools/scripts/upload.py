@@ -1,11 +1,12 @@
-import os
 import contextlib
 import html
+import os
+import subprocess
 from pathlib import Path
 from sys import argv
 
 from pyrogram import Client
-from pyrogram.types import InputMediaDocument, LinkPreviewOptions
+from pyrogram.types import InputMediaDocument
 
 api_id = os.environ.get("APP_ID")
 api_hash = os.environ.get("APP_HASH")
@@ -23,6 +24,40 @@ def get_commit_info():
     commit_message = os.environ.get("COMMIT_MESSAGE") or "unknown"
     return commit_id, commit_url, commit_message
 
+def get_app_version_name() -> str:
+    version = os.environ.get("APP_VERSION_NAME")
+    if version:
+        return version.strip()
+
+    properties = Path("gradle.properties")
+    for line in properties.read_text(encoding="utf-8").splitlines():
+        key, separator, value = line.partition("=")
+        if separator and key.strip() == "APP_VERSION_NAME":
+            return value.strip()
+
+    raise RuntimeError("APP_VERSION_NAME is missing from gradle.properties")
+
+
+def render_cover() -> Path:
+    commit_id, _, _ = get_commit_info()
+    version = get_app_version_name()
+    output = artifacts_path / f"Arkgram-v{version}-{commit_id}-cover.png"
+    subprocess.run(
+        [
+            os.environ.get("NODE_BIN", "node"),
+            "Tools/cover-renderer/render-cover.mjs",
+            "--version",
+            version,
+            "--detail",
+            commit_id,
+            "--output",
+            str(output),
+        ],
+        check=True,
+    )
+    return output
+
+
 def get_caption() -> str:
     commit_id, commit_url, commit_message = get_commit_info()
     pre = "Test version." if test_version else "Release version."
@@ -31,7 +66,7 @@ def get_caption() -> str:
     caption += f"See commit details [{commit_id}]({commit_url})"
     return caption
 
-def get_document() -> list["InputMediaDocument"]:
+def get_document() -> list:
     documents = []
     abis = ["arm64-v8a", "universal"]
     for abi in abis:
@@ -43,10 +78,7 @@ def get_document() -> list["InputMediaDocument"]:
             )
     if not documents:
         raise FileNotFoundError("No APK artifacts found")
-    base_caption = get_caption()
-    if base_caption and len(base_caption) > 1024:
-        base_caption = base_caption[:1020] + "..."
-    documents[-1].caption = base_caption
+
     return documents
 
 def get_metadata():
@@ -67,17 +99,36 @@ def retry(func):
     return wrapper
 
 @retry
-async def send_to_channel(client: "Client", cid: str):
+async def send_cover(client: "Client", cid: str, cover: Path):
     with contextlib.suppress(ValueError):
         cid = int(cid)
-    documents = get_document()
-    print("Uploading to Telegram:", flush=True)
-    for document in documents:
-        print(f"- {document.media}", flush=True)
+    caption = get_caption()
+    if caption and len(caption) > 1024:
+        caption = caption[:1020] + "..."
+    await client.send_photo(
+        chat_id = cid,
+        photo = str(cover),
+        caption = caption,
+    )
+
+@retry
+async def send_apks(client: "Client", cid: str, documents: list):
+    with contextlib.suppress(ValueError):
+        cid = int(cid)
     await client.send_media_group(
         cid,
         media = documents,
     )
+
+async def send_to_channel(client: "Client", cid: str):
+    cover = render_cover()
+    documents = get_document()
+    print("Uploading to Telegram:", flush=True)
+    print(f"- {cover}", flush=True)
+    for document in documents:
+        print(f"- {document.media}", flush=True)
+    await send_cover(client, cid, cover)
+    await send_apks(client, cid, documents)
 
 @retry
 async def send_metadata(client: "Client", cid: str):

@@ -131,6 +131,8 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: 3.12
+      - name: Install cover renderer dependencies
+        run: npm ci --prefix Tools/cover-renderer --ignore-scripts --no-audit --no-fund
       - name: Send to Telegram
         env:
           APP_ID: ${{ secrets.APP_ID }}

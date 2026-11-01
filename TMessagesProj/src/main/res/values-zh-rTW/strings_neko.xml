@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="NekoSettings">Ark-設定</string>
+    <string name="NekoSettings">PRTS</string>
     <string name="IPv6">偏好 IPv6</string>
     <string name="MessageMenu">訊息選單</string>
     <string name="HidePhone">隱藏手機號碼</string>
