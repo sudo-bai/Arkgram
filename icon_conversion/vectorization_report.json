@@ -1,0 +1,66 @@
+{
+  "input": "/home/skadi/下载/图标.jpeg",
+  "input_sha256": "70e54357a53c330509f08efd4fa31e7281e6cc0b9ebbc33d35ae6a731fe20a88",
+  "source_size": [
+    2048,
+    2048
+  ],
+  "parameters": {
+    "blur_sigma": 1.5,
+    "min_feature_area": 20,
+    "turdsize": 5,
+    "alphamax": 1.0,
+    "opttolerance": 0.2,
+    "potrace_unit": 10
+  },
+  "otsu_threshold": 126.0,
+  "dark_component_count": 7,
+  "largest_dark_component_area_px": 2464801,
+  "disk_area_px": 3295817,
+  "white_component_count_kept": 10,
+  "white_component_areas_px": [
+    213288,
+    66650,
+    46107,
+    10356,
+    10257,
+    2487,
+    2464,
+    2446,
+    2445,
+    1883
+  ],
+  "white_component_areas_rejected_px": [],
+  "white_area_px": 358383,
+  "outputs": {
+    "svg": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon.svg",
+    "png": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon_2048.png",
+    "mask": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon_black_mask.png",
+    "checkerboard_preview": "/home/skadi/文档/Project/Arkgram/icon_conversion/arkgram_icon_preview_checkerboard.png"
+  },
+  "svg_sha256": "7acb07cfd80af8fd94ca8d833b3d421ffe8bc9cad595994d8d41884ef5eea3ef",
+  "png_sha256": "824a5074d387396425f2b53022a202eeb1aa322adb0a9e9f0f6c6b8ed7cc5162",
+  "render_size": [
+    2048,
+    2048
+  ],
+  "validation": {
+    "disk_iou_at_render_size": 0.9996950752375303,
+    "white_iou_at_render_size": 0.9916789606896877,
+    "black_iou_at_render_size": 0.998638973867958,
+    "white_boundary_distance_px": {
+      "mean_px": 0.05134858936071396,
+      "p95_px": 1.0,
+      "max_px": 1.399999976158142
+    },
+    "alpha_nonzero_outside_disk_px": 3056,
+    "alpha_nonzero_outside_disk_plus_2px_px": 0,
+    "fully_transparent_pixel_fraction": 0.21349787712097168,
+    "corner_alpha_values": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}
