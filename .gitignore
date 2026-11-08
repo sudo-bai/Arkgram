@@ -16,3 +16,7 @@ TMessagesProj/afat/
 TMessagesProj/release.keystore
 TMessagesProj/jni/ffmpeg/build_android
 node_modules/
+/build-g0a-arm64/
+/build-g0a-x86_64/
+__pycache__/
+/docs/
