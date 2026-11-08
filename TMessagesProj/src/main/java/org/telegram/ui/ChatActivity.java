@@ -3887,15 +3887,8 @@ public class ChatActivity extends BaseFragment implements
 
         @Override
         protected boolean canCopy() {
-            if (chatActivity != null && chatActivity.getDialogId() == UserObject.VERIFY) {
-                return true;
-            }
-            return chatActivity == null || !(selectedView != null && selectedView.getMessageObject() != null && selectedView.getMessageObject().messageOwner != null);
-            /* upstream 13.0.3→13.1.1 版本（保留对照，不启用）：
-               return chatActivity == null || !(
-                   !DialogObject.isEncryptedDialog(chatActivity.getDialogId()) && chatActivity.isPeerNoForwards() ||
-                selectedView != null && selectedView.getMessageObject() != null && (selectedView.getMessageObject().messageOwner != null && selectedView.getMessageObject().messageOwner.noforwards)
-            );*/
+            // Arkgram: allow copying all messages, including protected/no-forwards chats.
+            return true;
         }
 
         @Override
